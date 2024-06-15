@@ -72,7 +72,8 @@ def update(page_info):
 def clear_rich_presence():
     global THE_TITLE
     rpc.clear()
-    print("rpc cleared")
+    print(
+        f"rpc cleared : {THE_TITLE.mal_title_id if THE_TITLE else '-'} | {THE_TITLE.current_episode if THE_TITLE else '-'}")
     THE_TITLE = None
 
 

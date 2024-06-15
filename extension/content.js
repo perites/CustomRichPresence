@@ -1,6 +1,9 @@
 //TODO manual current episode
 //TODO application ID setting
 // TODO button to clear status
+// TODO send request only if data chenges
+window.intervalId = null
+
 function find_title_name() {
     const title_name = document.getElementsByClassName('romanji')[0].textContent;
     return title_name
