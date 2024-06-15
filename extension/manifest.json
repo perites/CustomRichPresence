@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "CustomRichPresence",
+  "version": "0.1",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://animejoy.ru/tv-serialy/*",
+        "https://animejoy.ru/anime-films/*",
+        "https://animejoy.ru/ova/*"
+      ],
+      "js": [
+        "Content.js"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://animejoy.ru/*"
+  ],
+  "icons": {
+    "48": "logo_anime_joy.png",
+    "128": "logo_anime_joy.png"
+  }
+}
+
+	
