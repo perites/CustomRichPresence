@@ -1,8 +1,9 @@
 //TODO manual current episode
 //TODO application ID setting
 // TODO button to clear status
-// TODO send request only if data chenges
 window.intervalId = null
+
+window.oldData = null
 
 function find_title_name() {
     const title_name = document.getElementsByClassName('romanji')[0].textContent;
@@ -46,20 +47,22 @@ function get_info_from_page() {
 
 function send_info() {
     const page_info = get_info_from_page()
-    const data = {"data": page_info, "method": "update"}
+    const data = JSON.stringify({"data": page_info, "method": "update"})
+    if (window.oldData !== data) {
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: data
+        };
 
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    };
-
-    const url = 'http://127.0.0.1:5000/receiveinfo';
-    fetch(url, options)
-        .then(response => response.json())
-        .catch(error => console.error('Error:', error));
+        const url = 'http://127.0.0.1:5000/receiveinfo';
+        fetch(url, options)
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+        window.oldData = data
+    }
 }
 
 function clear_info() {
@@ -78,6 +81,3 @@ function clear_info() {
         .then(response => response.json())
         .catch(error => console.error('Error:', error));
 }
-
-
-

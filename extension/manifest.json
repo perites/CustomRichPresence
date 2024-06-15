@@ -23,7 +23,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://animejoy.ru/*"
+    "<all_urls>"
   ],
   "icons": {
     "48": "logo_anime_joy.png",
