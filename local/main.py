@@ -7,9 +7,20 @@ from mal import Anime
 import urllib.parse
 
 # TODO add time support
+# TODO add logs
+# TODO Add readme to git
+
+# TODO manual current episode
+# TODO application ID setting
+# TODO button to clear status
+
+# TODO Cmplitly invisible on startup
+# TODO support to youtube
+
 
 app = Flask(__name__)
-CORS(app, resources={r"/receiveinfo": {"origins": "https://animejoy.ru"}})
+CORS(app, resources={
+    r"/receiveinfo": {"origins": ["https://animejoy.ru", "chrome-extension://dbcbbndaklflflpmibcinoffbegfaple"]}})
 
 CLIENT_ID = '1250924979776786514'
 rpc = Presence(CLIENT_ID)
@@ -71,9 +82,11 @@ def update(page_info):
 
 def clear_rich_presence():
     global THE_TITLE
+    if not THE_TITLE:
+        return
     rpc.clear()
     print(
-        f"rpc cleared : {THE_TITLE.mal_title_id if THE_TITLE else '-'} | {THE_TITLE.current_episode if THE_TITLE else '-'}")
+        f"rpc cleared : {THE_TITLE.mal_title_id} | {THE_TITLE.current_episode}")
     THE_TITLE = None
 
 
@@ -81,6 +94,7 @@ def clear_rich_presence():
 def receiveinfo():
     data = request.get_json()
 
+    print(request.headers.get('Origin'), )
     # print(data['data'])
 
     match data["method"]:

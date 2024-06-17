@@ -1,28 +1,34 @@
-let oldActiveAJTabId = null;
-setInterval(() => {
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            if (oldActiveAJTabId !== null && oldActiveAJTabId !== tabs[0].id) {
-                chrome.scripting.executeScript({
-                    target: {tabId: oldActiveAJTabId},
-                    function: () => {
-                        clear_info()
-                        window.oldData = null;
-                    }
-                }, () => {
-                    oldActiveAJTabId = null;
-                })
-            }
+const sendData = (info, method) => {
+    const data = JSON.stringify({"data": info, "method": method})
 
-            if ((tabs[0].url).startsWith("https://animejoy.ru/")) {
-                chrome.scripting.executeScript({
-                    target: {tabId: tabs[0].id},
-                    function: () => {
-                        send_info()
-                    }
-                })
-                oldActiveAJTabId = tabs[0].id;
-            }
-
-        });
+    const methodsToCheck = ["update"]
+    if (methodsToCheck.includes(method) && oldData === data) {
+        return
     }
-    , 5000)
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: data
+    };
+
+    const url = 'http://127.0.0.1:5000/receiveinfo';
+
+    fetch(url, options).catch((er) => console.log(er))
+
+    oldData = data;
+
+}
+
+let oldData = "";
+
+chrome.runtime.onMessage.addListener(async (message) => {
+    // console.log("MESSAGE !", message)
+    if (message.action === "sendData") {
+
+        // console.log("need to send")
+        await sendData(message.info, message.method)
+        // console.log("data send")
+    }
+});
