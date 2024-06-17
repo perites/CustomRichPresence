@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CustomRichPresence",
-  "version": "0.1",
+  "version": "1.0",
   "content_scripts": [
     {
       "matches": [
@@ -17,6 +17,10 @@
   "background": {
     "service_worker": "background.js"
   },
+  "permissions": [
+    "activeTab",
+    "nativeMessaging"
+  ],
   "icons": {
     "48": "logo_anime_joy.png",
     "128": "logo_anime_joy.png"

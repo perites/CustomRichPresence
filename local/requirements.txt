@@ -2,3 +2,4 @@ Flask~=3.0.3
 pypresence~=4.3.0
 mal-api~=0.5.3
 flask_cors~=4.0.1
+pyinstaller~=6.8.0

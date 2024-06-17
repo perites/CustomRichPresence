@@ -1,0 +1,9 @@
+{
+  "name": "com.nativemessaging.customrichpresence",
+  "description": "Native Messaging host for Custom Rich Presence",
+  "path": "C:\\Users\\nikit\\PycharmProjects\\CustomRichPresence\\local\\build\\native_messaging_host.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://dbcbbndaklflflpmibcinoffbegfaple/"
+  ]
+}

@@ -1,34 +1,29 @@
 const sendData = (info, method) => {
-    const data = JSON.stringify({"data": info, "method": method})
+    const data = {"data": info, "method": method}
 
-    const methodsToCheck = ["update"]
-    if (methodsToCheck.includes(method) && oldData === data) {
+    if (methodsToCheck.includes(method) && JSON.stringify(oldData) === JSON.stringify(data)) {
+        console.log("Data was not sent, identical to old.")
         return
     }
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: data
-    };
 
-    const url = 'http://127.0.0.1:5000/receiveinfo';
-
-    fetch(url, options).catch((er) => console.log(er))
+    port.postMessage(data);
+    console.log("Data sent to Native Message Host | Data :", data)
 
     oldData = data;
-
 }
 
 let oldData = "";
+const methodsToCheck = ["update"]
+const port = chrome.runtime.connectNative('com.nativemessaging.customrichpresence');
+console.log("Connected to Native Messaging Host | port : ", port)
+
+port.onDisconnect.addListener(() => {
+    console.warn('Native Messaging Host disconnected');
+});
 
 chrome.runtime.onMessage.addListener(async (message) => {
-    // console.log("MESSAGE !", message)
     if (message.action === "sendData") {
-
-        // console.log("need to send")
+        console.log("Received data from content.js, proceed | Info :", message.info, "| Method :", message.method)
         await sendData(message.info, message.method)
-        // console.log("data send")
     }
 });

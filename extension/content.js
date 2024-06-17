@@ -1,4 +1,3 @@
-// TODO Add logs ?
 const findTitleName = () => {
     return document.getElementsByClassName('romanji')[0].textContent
 };
@@ -41,28 +40,42 @@ const sendData = (info, method) => {
         info: info,
         method: method
     })
+    console.log("Sent data to background.js | Info :", info, "| Method :", method)
 };
 
+const sendDataUpdate = () => {
+    sendData(getInfoFromPage(), "update");
+}
 
-console.log('start sending 1th time')
-let intervalId = setInterval(() => {
-    sendData(getInfoFromPage(), "update")
+const sendDataClear = () => {
+    sendData("-", "clear");
+}
+
+console.log('Start sending 1th time')
+
+let updateIntervalId = setInterval(() => {
+    sendDataUpdate();
 }, 5000);
+
+console.log("Created update interval with id : ", updateIntervalId)
+
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        console.log('start sending')
-        sendData(getInfoFromPage(), "update");
-        
-        intervalId = setInterval(() => {
-            sendData(getInfoFromPage(), "update")
+        console.log('Start sending')
+        sendDataUpdate();
+
+        updateIntervalId = setInterval(() => {
+            sendDataUpdate()
         }, 5000);
+        console.log("Created update interval with id :", updateIntervalId)
+
     } else {
-        console.log("need to CLEAR")
-        clearInterval(intervalId);
-        sendData("-", "clear");
+        console.log("Need to clear |", "updateIntervalId :", updateIntervalId)
+        clearInterval(updateIntervalId);
+        sendDataClear();
     }
 });
 
 window.addEventListener('beforeunload', () => {
-    sendData("-", "clear")
+    sendDataClear();
 })
