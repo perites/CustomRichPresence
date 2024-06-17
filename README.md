@@ -2,7 +2,9 @@
 
 In this project, a Chrome extension communicates with a local Python script to send information about the webpage the user is currently viewing. The Python script then updates the Rich Presence (RP) status in the local Discord application.
 
-Gathers information from: animejoy.ru
+Gathers information from: 
+- animejoy.ru
+  
 
 ## Technologies Used
 
