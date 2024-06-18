@@ -1,23 +1,39 @@
 import sys
-import struct
+import os
 
-import json
 import logging
-import urllib.parse
 
-from pypresence import Presence
-from mal import Anime
+venv_path = "C:\\Users\\nikit\\PycharmProjects\\CustomRichPresence\\local\\.venv"
+site_packages = os.path.join(venv_path, 'Lib', 'site-packages')
+sys.path.insert(0, site_packages)
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
+                    filename="C:\\Users\\nikit\PycharmProjects\\CustomRichPresence\\local\\native_messaging_host.log",
+                    filemode='w', level=logging.DEBUG, encoding='utf-8')
+
+logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+logging.getLogger("requests").setLevel(logging.CRITICAL)
+logger = logging.getLogger(__name__)
+try:
+    import json
+    import struct
+    import urllib.parse
+
+    from pypresence import Presence
+    from mal import Anime
+except Exception as e:
+    logging.error(e)
 
 
 # TODO add time support
 
+# TODO confg file
 # TODO manual current episode
 # TODO application ID setting
 # TODO button to clear status
 
 # TODO support to youtube
 
-# pyinstaller --onefile --distpath local\build --workpath local\build\other --specpath local\build\other local\native_messaging_host.py
 
 class Title:
     def __init__(self, mal_title_id=None, title_name=None, current_episode=-1):
@@ -88,13 +104,6 @@ def clear_rich_presence():
     THE_TITLE = None
 
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
-                    filename="C:\\Users\\nikit\PycharmProjects\\CustomRichPresence\\local\\native_messaging_host.log",
-                    filemode='w', level=logging.DEBUG, encoding='utf-8')
-
-logging.getLogger("urllib3").setLevel(logging.CRITICAL)
-logging.getLogger("requests").setLevel(logging.CRITICAL)
-logger = logging.getLogger(__name__)
 CLIENT_ID = '1250924979776786514'
 rps = Presence(CLIENT_ID)
 rps.connect()
@@ -106,11 +115,11 @@ def main():
     logger.info('Starting native_messaging_host')
     while True:
         try:
-            text_length_bytes = sys.stdin.buffer.read(4)
+            message_length_bytes = sys.stdin.buffer.read(4)
             logging.debug(f"Data received")
-            if len(text_length_bytes) == 0:
+            if len(message_length_bytes) == 0:
                 sys.exit(0)
-            text_length = struct.unpack('i', text_length_bytes)[0]
+            text_length = struct.unpack('i', message_length_bytes)[0]
             data_raw = sys.stdin.buffer.read(text_length).decode('utf-8')
             data = json.loads(data_raw)
             logging.debug(f"Data parsed: {data}")
