@@ -66,10 +66,18 @@ const sendDataClear = () => {
 
 
 console.log('Start sending 1th time')
-const titleName = findTitleName();
-const MALTitleID = getMALTitleId();
+
+let titleName = "";
+let MALTitleID = "";
+setTimeout(() => {
+    titleName = findTitleName();
+    MALTitleID = getMALTitleId();
+}, 1000)
+
+
 let dataOld = "";
 let counter = 0;
+
 
 let updateIntervalId = setInterval(() => {
     sendDataUpdate();

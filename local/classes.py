@@ -1,7 +1,10 @@
 import sys
 import logging
 
+import json
+import struct
 import urllib.parse
+
 from dataclasses import dataclass
 
 try:
@@ -10,6 +13,42 @@ try:
 except Exception as e:
     logging.error(f"Failed to load external modules, exiting | Exception:{e} ")
     sys.exit(1)
+
+
+class NativeMessagesToRPS:
+    activities_manager = NotImplemented
+    rpapps_controller = NotImplemented
+
+    def set_activities_manager(self, activities_manager):
+        self.activities_manager = activities_manager
+
+    def set_rpapps_controller(self, rpapps_controller):
+        self.rpapps_controller = rpapps_controller
+
+    @staticmethod
+    def get_native_message():
+        raw_length = sys.stdin.buffer.read(4)
+        if len(raw_length) == 0:
+            sys.exit(0)
+        message_length = struct.unpack("@I", raw_length)[0]
+        message = sys.stdin.buffer.read(message_length).decode("utf-8")
+        return json.loads(message)
+
+    def start_loop(self):
+        logging.info('\nStarting native_messaging_host')
+        while True:
+            try:
+                json_data = self.get_native_message()
+                logging.debug(f"Data parsed: {json_data}")
+
+                activity_info = self.activities_manager.activity_handle(activity_name=json_data['activity'],
+                                                                        method=json_data['method'],
+                                                                        info=json_data['info'], )
+
+                self.rpapps_controller.change_state(activity_info)
+
+            except Exception as e:
+                logging.error(f"Error in main loop | Exception: {e}")
 
 
 class RPAppsController:
@@ -22,44 +61,49 @@ class RPAppsController:
             logging.error(e)
 
         self.connected_rp_app_name = None
-        self.previous_data = None
+        self.previous_activity_info = None
 
-    def change_state(self, state_info):
-        if self.previous_data == state_info:
-            logging.warning("New data identical to previous, no changes done")
+    def change_state(self, activity_info):
+        if self.previous_activity_info == activity_info:
+            logging.info("New data identical to previous, no changes done")
             return
 
-        self.previous_data = state_info
-
-        match state_info.method:
+        match activity_info.method:
             case "update":
                 if not self.connected_rp_app_name:
-                    self.apps[state_info.app_name].connect()
-                    self.connected_rp_app_name = state_info.app_name
+                    self.apps[activity_info.app_name].connect()
+                    self.connected_rp_app_name = activity_info.app_name
                     logging.debug(f"First connection,  to app : {self.connected_rp_app_name}")
 
-                elif not (self.connected_rp_app_name == state_info.app_name):
+                elif not (self.connected_rp_app_name == activity_info.app_name):
                     self.apps[self.connected_rp_app_name].close()
                     logging.debug(f"Disconnected from app : {self.connected_rp_app_name}")
 
-                    self.apps[state_info.app_name].connect()
-                    self.connected_rp_app_name = state_info.app_name
+                    self.apps[activity_info.app_name].connect()
+                    self.connected_rp_app_name = activity_info.app_name
                     logging.debug(f"Connected to app : {self.connected_rp_app_name}")
 
-                self.apps[self.connected_rp_app_name].update(**state_info.data.__dict__)
+                self.apps[self.connected_rp_app_name].update(**activity_info.data.__dict__)
                 logging.info(f"Updated RP for app : {self.connected_rp_app_name}")
 
             case "clear":
-                if not (self.connected_rp_app_name == state_info.app_name):
-                    logging.warning(f"App that need to be cleared is NOT connected | App name : {state_info.app_name}")
+                if not (self.connected_rp_app_name == activity_info.app_name):
+                    logging.warning(
+                        f"App that need to be cleared is NOT connected | App name : {activity_info.app_name}")
                     return
                 self.apps[self.connected_rp_app_name].clear()
-                self.previous_data = None
+                self.previous_activity_info = None
                 logging.info(f"Cleared RP for app : {self.connected_rp_app_name}")
 
-            case _:
-                logging.warning(f"Wrong method in state info | Method : {state_info.method}")
+            case "ignore":
+                logging.debug("Got 'ignore' method, no changes done")
                 return
+
+            case _:
+                logging.warning(f"Wrong method in state info | Method : {activity_info.method}")
+                return
+
+        self.previous_activity_info = activity_info
 
 
 @dataclass(frozen=True)
@@ -88,50 +132,93 @@ class ActivityInfo:
 class ActivitiesManager:
     current_activity_info = None
 
+    ignore_activity_info = ActivityInfo(
+        app_name="ActivitiesManager",
+        method="ignore",
+        activity_priority=-1,
+    )
+
     # last_updated_at : datetime
     # thread check_last_apdated | while las_updated+current_activity_max_idle minute > now()
-    def __init__(self, *args):
-        self.activities = {activity.activity_name: activity for activity in args}
-        # todo check if priorities unique
+    def __init__(self, *raw_activities):
+        self.activities = self.set_activities(*raw_activities)
 
-    def activity_handle(self, activity_name, method, info):
+    @staticmethod
+    def set_activities(*raw_activities):
+        activities = {}
+
+        used_priorities = []
+        for activity in raw_activities:
+            if not isinstance(activity, Activity):
+                logging.error(f"ActivitiesManager set wrong type: {type(activity)} | Must be an Activity")
+                sys.exit(1)
+            try:
+                int(activity.priority)
+            except ValueError:
+                logging.error(f"Priority must be an integer")
+                sys.exit(1)
+
+            if activity.priority in used_priorities:
+                logging.error(
+                    f"Activities manager already has priority {activity.priority}, Activity priority must be unique")
+                sys.exit(1)
+
+            used_priorities.append(activity.priority)
+            activities[activity.activity_name] = activity
+
+        logging.debug(f"Activities manager initialized with {len(activities)} activities")
+        return activities
+
+    def activity_handle(self, activity_name, method, info) -> ActivityInfo:
         new_activity_info = self.activities[activity_name].handle(method, info)
-        return self.process_new_activity_info(new_activity_info)
 
-    def process_new_activity_info(self, new_activity_info):
-        if not new_activity_info:
-            logging.debug("No new activity info")
-            return False
+        result = self.process_activity_info(new_activity_info)
+        return result
 
-        if not self.current_activity_info:
-            self.current_activity_info = new_activity_info
+    def process_activity_info(self, activity_info) -> ActivityInfo:
+        match activity_info.method:
+            case "ignore":
+                logging.debug("Got activity method 'ignore', proceed")
+                response_activity_info = activity_info
 
-            logging.debug("No current activity info, set new")
-            return self.current_activity_info
-
-        match new_activity_info.method:
             case "update":
-                if new_activity_info.activity_priority <= self.current_activity_info.activity_priority:
-                    self.current_activity_info = new_activity_info
+                if not self.current_activity_info:
+                    self.current_activity_info = activity_info
+                    response_activity_info = activity_info
+
+                    logging.debug("No current activity info, set new")
+
+                elif activity_info.activity_priority <= self.current_activity_info.activity_priority:
+                    self.current_activity_info = activity_info
+                    response_activity_info = activity_info
+
                     logging.debug(
-                        f"New activity has higher priority, updating current activity | activity_info : {new_activity_info}")
-                    return new_activity_info
+                        f"New activity has higher priority, updating current activity | activity_info : {activity_info}")
+
                 else:
-                    logging.debug("New activity info doesn't have higher priority, doing nothing")
-                    return False
+                    response_activity_info = self.ignore_activity_info
+                    logging.debug("New activity info doesn't have higher priority, ignoring")
 
             case "clear":
-                if new_activity_info.activity_priority == self.current_activity_info.activity_priority:
+                if not self.current_activity_info:
+                    logging.warning("Attempt to clear, but no active activity, ignoring")
+                    response_activity_info = self.ignore_activity_info
+
+                elif activity_info.activity_priority == self.current_activity_info.activity_priority:
                     self.current_activity_info = None
-                    logging.debug("Current activity and new to clean is same,  info cleared")
-                    return new_activity_info
+                    response_activity_info = activity_info
+                    logging.debug("Clearing current activity")
+
                 else:
-                    logging.debug("Current activity isn`t new activity, doing nothing")
-                    return False
+                    response_activity_info = self.ignore_activity_info
+                    logging.debug("Can`t clear activity which is not current, ignoring")
 
             case _:
-                logging.warning(f"Wrong method in state info | Method : {new_activity_info.method}")
-                return False
+                response_activity_info = self.ignore_activity_info
+                logging.warning(
+                    f"Wrong method in activity info, sent ignore_activity_info | Method : {activity_info.method}")
+
+        return response_activity_info
 
 
 class Activity:
@@ -151,16 +238,24 @@ class Activity:
                                 "update": self._handle_update}
 
     def handle(self, method, data) -> ActivityInfo:
-        logging.debug(f"Need to handle method : {method} | Data : {data}")
+        logging.debug(f"Need to handle method : {method}")
         try:
-            return self.handled_methods[method](data)
+            success, data = self.handled_methods[method](data)
+
+            return ActivityInfo(
+                activity_priority=self.priority,
+                app_name=self.main_rp_app_name,
+
+                method=method if success else "ignore",
+                data=data
+            )
         except Exception as e:
             logging.error(f"Exception while handling method : {method} | Exception : {e}")
 
-    def _handle_clean(self, data):
+    def _handle_update(self, data) -> (bool, UpdateInfo):
         raise NotImplementedError
 
-    def _handle_update(self, data):
+    def _handle_clean(self, data) -> (bool, None):
         raise NotImplementedError
 
 
@@ -186,33 +281,25 @@ class WatchingAnimeJoyActivity(Activity):
         #     logging.warning("No changes detected in page_info, returning False")
         #     return False
 
-        return ActivityInfo(
-            app_name=self.main_rp_app_name,
-            method="update",
-            activity_priority=self.priority,
-            data=UpdateInfo(
-                details=self.current_title.title_name,
-                state=f"{self.current_title.media_type}, episode",
-                party_size=[self.current_title.current_episode, self.current_title.episodes_amount],
-                large_image=self.current_title.poster_url,
-                large_text="Poster",
-                buttons=[{"label": "Page on MAL", "url": self.current_title.url_to_mal},
-                         {"label": "Progress", "url": self.current_title.url_to_progress},
-                         ]
-            )
+        return True, UpdateInfo(
+            details=self.current_title.title_name,
+            state=f"{self.current_title.media_type}, episode",
+            party_size=[self.current_title.current_episode, self.current_title.episodes_amount],
+            large_image=self.current_title.poster_url,
+            large_text="Poster",
+            buttons=[{"label": "Page on MAL", "url": self.current_title.url_to_mal},
+                     {"label": "Progress", "url": self.current_title.url_to_progress},
+                     ]
         )
 
     def _handle_clean(self, page_info):
         if not self.current_title or page_info['mal_title_id'] != self.current_title.mal_title_id:
             logging.warning("Was not cleaned, current_title and title to clean are not the same")
-            return False
+            return False, None
 
         self.current_title = None
         logging.debug(f"Clean method called on {self.main_rp_app_name}, current_title became None")
-        return ActivityInfo(app_name=self.main_rp_app_name,
-                            method="clear",
-                            activity_priority=self.priority,
-                            )
+        return True, None
 
 
 @dataclass()
@@ -236,26 +323,16 @@ class Title:
 
 class WatchingYoutubeActivity(Activity):
     activity_name = "WatchingYoutube"
-    main_rp_app_name = "watching"
+    main_rp_app_name = "test"
 
     def __init__(self, priority=0):
         super().__init__(priority)
 
     def _handle_update(self, page_info):
-        return ActivityInfo(
-            app_name=self.main_rp_app_name,
-            method="update",
-            activity_priority=int(page_info),
-            data=UpdateInfo(
-                details="watching_youtube",
-                state=f"videos",
-
-            )
+        return True, UpdateInfo(
+            details="watching_youtube",
+            state=f"videos",
         )
 
     def _handle_clean(self, page_info):
-        return ActivityInfo(
-            app_name=self.main_rp_app_name,
-            method="clear",
-            activity_priority=int(page_info),
-        )
+        return True, None
