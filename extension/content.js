@@ -28,30 +28,48 @@ const getMALTitleId = () => {
 
 const getInfoFromPage = () => {
     return {
-        "title_name": findTitleName(),
+        "title_name": titleName,
         "current_episode": getCurrentEpisode(),
-        "mal_title_id": getMALTitleId()
+        "mal_title_id": MALTitleID
     }
 };
 
-const sendData = (info, method) => {
-    chrome.runtime.sendMessage({
+const sendData = (info, method, activity) => {
+    const dataToSend = {
         action: "sendData",
         info: info,
-        method: method
-    })
-    console.log("Sent data to background.js | Info :", info, "| Method :", method)
+        method: method,
+        activity: activity
+    }
+
+    if (JSON.stringify(dataOld) === JSON.stringify(dataToSend) && (counter <= 10)) {
+        console.log("Data was not sent, identical to old")
+        counter++
+        return
+    }
+
+    chrome.runtime.sendMessage(dataToSend)
+    console.log("Sent data to background.js | Info :", info, "| Method :", method, "| Activity ", activity)
+    dataOld = dataToSend
+    counter = 0;
+
 };
 
 const sendDataUpdate = () => {
-    sendData(getInfoFromPage(), "update");
+    sendData(getInfoFromPage(), "update", "WatchingAnimeJoy");
 }
 
 const sendDataClear = () => {
-    sendData("-", "clear");
+    sendData(getInfoFromPage(), "clear", "WatchingAnimeJoy");
+
 }
 
+
 console.log('Start sending 1th time')
+const titleName = findTitleName();
+const MALTitleID = getMALTitleId();
+let dataOld = "";
+let counter = 0;
 
 let updateIntervalId = setInterval(() => {
     sendDataUpdate();
