@@ -72,7 +72,7 @@ let MALTitleID = "";
 setTimeout(() => {
     titleName = findTitleName();
     MALTitleID = getMALTitleId();
-}, 1000)
+}, 500)
 
 
 let dataOld = "";
