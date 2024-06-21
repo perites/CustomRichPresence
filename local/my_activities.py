@@ -1,8 +1,6 @@
 import logging
 import sys
 
-import json
-import struct
 import urllib.parse
 
 from dataclasses import dataclass
@@ -18,6 +16,7 @@ except Exception as e:
 class WatchingAnimeJoyActivity(Activity):
     activity_name = "WatchingAnimeJoy"
     main_rp_app_name = "watching"
+    clear_delay_seconds = 60
 
     def __init__(self, priority=0):
         super().__init__(priority)
@@ -80,6 +79,7 @@ class Title:
 class WatchingYoutubeActivity(Activity):
     activity_name = "WatchingYoutube"
     main_rp_app_name = "test"
+    clear_delay_seconds = 60
 
     def __init__(self, priority=0):
         super().__init__(priority)

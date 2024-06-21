@@ -10,20 +10,20 @@ class UpdateInfo:
     state: str
 
     start: int = None
-    party_size: list = None
-
+    party_size: list[int] = None
     large_image: str = None
     large_text: str = None
-
-    buttons: list[dict] = None
+    buttons: list[dict[str, str]] = None
 
 
 @dataclass(frozen=True)
 class ActivityInfo:
-    app_name: str
     method: str
+    
     activity_priority: int
-    # max_stays_idle
+    delay: int
+    app_name: str
+
     data: UpdateInfo = None
 
 
@@ -31,9 +31,11 @@ class ActivitiesManager:
     current_activity_info = None
 
     ignore_activity_info = ActivityInfo(
-        app_name="ActivitiesManager",
         method="ignore",
+
         activity_priority=-1,
+        delay=-1,
+        app_name="ActivitiesManager",
     )
 
     # last_updated_at : datetime
@@ -96,6 +98,7 @@ class ActivitiesManager:
                 else:
                     response_activity_info = self.ignore_activity_info
                     logger.debug("New activity info doesn't have higher priority, ignoring")
+                    # buffer
 
             case "clear":
                 if not self.current_activity_info:
@@ -110,6 +113,7 @@ class ActivitiesManager:
                 else:
                     response_activity_info = self.ignore_activity_info
                     logger.debug("Can`t clear activity other than current, ignoring")
+                    # buffer
 
             case _:
                 response_activity_info = self.ignore_activity_info
@@ -121,13 +125,14 @@ class ActivitiesManager:
 
 class Activity:
     activity_name = NotImplemented
-    start_stays_minutes = NotImplemented
+    clear_delay_seconds = None
     max_idle_minutes = NotImplemented
     main_rp_app_name = NotImplemented
 
     def __init__(self, priority=0):
         self.priority = priority
 
+        self.validate_clear_delay()
         self.started_at = None
         self.last_clean_call = None
         self.last_update_call = None
@@ -135,16 +140,30 @@ class Activity:
         self.handled_methods = {"clear": self._handle_clean,
                                 "update": self._handle_update}
 
+    def validate_clear_delay(self):
+        if self.clear_delay_seconds:
+            try:
+                int(self.clear_delay_seconds)
+            except ValueError:
+                logger.error(f"Clear delay must be an integer")
+                sys.exit(1)
+
+            if self.clear_delay_seconds < 1:
+                logger.error("Clear delay must be greater than one second. Use None to disable delay.")
+                sys.exit(1)
+
     def handle(self, method, data) -> ActivityInfo:
         logger.debug(f"Need to handle method : {method}")
 
         success, data = self.handled_methods[method](data)
 
         return ActivityInfo(
+            method=method if success else "ignore",
+
             activity_priority=self.priority,
+            delay=self.clear_delay_seconds,
             app_name=self.main_rp_app_name,
 
-            method=method if success else "ignore",
             data=data
         )
 

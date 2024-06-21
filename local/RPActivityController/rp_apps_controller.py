@@ -57,7 +57,7 @@ class RPAppsController:
                 return
 
             case _:
-                logger.warning(f"Wrong method in state info | Method : {activity_info.method}")
+                logger.warning(f"Wrong method in state info '{activity_info.method}'")
                 return
 
         self.previous_activity_info = activity_info

@@ -1,17 +1,17 @@
+# todo Activity manager buffer ?
+# TODO separate file using Sockets
+
 # TODO add time support for WatchingAnime
 
 # TODO add custom activity_name from popup.html
 #   TODO manual current episode
 #   TODO button to clear status
-
-
 # TODO confg file
 #   TODO application ID setting
-# todo Clear after some delay ?
 # TODO support to youtube
 # TODO Instalasion gude
-# TODO extention for pycharm
-# TODO separate file using Sockets
+# TODO extention for pycharm , using https://github.com/Almighty-Alpaca/JetBrains-Discord-Integration/tree/master ?
+
 
 import sys
 import os
@@ -31,12 +31,13 @@ logging.basicConfig(
     filename="native_messaging_host.log",
     filemode='w', level=logging.DEBUG, encoding='utf-8')
 
-logging.getLogger("urllib3").setLevel(logging.CRITICAL)
-logging.getLogger("requests").setLevel(logging.CRITICAL)
+logging.getLogger("urllib3").setLevel(logging.ERROR)
+logging.getLogger("requests").setLevel(logging.ERROR)
+
 logging.getLogger("rpac").setLevel(logging.DEBUG)
 
 try:
-    from RPActivityController import RichPresenceActivityController, RPAppsController, ActivitiesManager
+    from RPActivityController import RichPresenceActivitiesController, RPAppsController, ActivitiesManager
     from my_activities import WatchingAnimeJoyActivity, WatchingYoutubeActivity
 except Exception as e:
     logging.exception(f"Failed to load modules, exiting")
@@ -45,7 +46,7 @@ except Exception as e:
 config_apps = {"watching": "1250924979776786514",
                "test": "1252626262346694686"}
 
-rpac = RichPresenceActivityController()
+rpac = RichPresenceActivitiesController()
 rpac.set_activities_manager(
     ActivitiesManager(
         WatchingAnimeJoyActivity(2),
@@ -74,11 +75,6 @@ def main():
             logging.debug(f"Data parsed: {json_data}")
 
             rpac.process_raw_data(json_data)
-            # activity_info = self.activities_manager.activity_handle(activity_name=json_data['activity'],
-            #                                                         method=json_data['method'],
-            #                                                         info=json_data['info'], )
-            #
-            # self.rpapps_controller.change_state(activity_info)
 
         except Exception as e:
             logging.exception(f"Caught exception in main loop")
