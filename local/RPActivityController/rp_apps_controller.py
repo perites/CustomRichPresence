@@ -16,6 +16,7 @@ class RPAppsController:
         except Exception as exception:
             logger.exception(
                 "Exception while initializing RPAppsController, couldn`t made Presence object, most likely wrong ID")
+            sys.exit(1)
 
         self.connected_rp_app_name = None
         self.previous_activity_info = None
@@ -24,6 +25,10 @@ class RPAppsController:
         if self.previous_activity_info == activity_info:
             logger.info("New data identical to previous, no changes done")
             return
+
+        if (not activity_info.method == "ignore") and (not self.apps.get(activity_info.app_name)):
+            logger.error(f"App '{activity_info.app_name}' does not exist")
+            sys.exit(1)
 
         match activity_info.method:
             case "update":

@@ -2,13 +2,11 @@ import sys
 
 from dataclasses import dataclass
 import urllib.parse
-import logging
 
-logger = logging.getLogger("custom_activities")
-logger.setLevel(logging.DEBUG)
+from .logger import logger
 
 try:
-    from RPActivityController import Activity, UpdateInfo
+    from Activity import Activity, UpdateInfo
     from mal import Anime
 except Exception as exception:
     logger.exception(f"Failed to load external modules, exiting")
@@ -76,39 +74,3 @@ class Title:
 
         self.url_to_mal = self.mal_title.url
         self.url_to_progress = f"https://myanimelist.net/animelist/perite?s={urllib.parse.quote(self.title_name or self.raw_title_name)}"
-
-
-class WatchingYoutubeActivity(Activity):
-    activity_name = "WatchingYoutube"
-    main_rp_app_name = "watching"
-    clear_delay_seconds = 60
-
-    def __init__(self, priority):
-        super().__init__(priority)
-
-    def _handle_update(self, page_info):
-        return True, UpdateInfo(
-            details="watching_youtube",
-            state=f"videos",
-        )
-
-    def _handle_clean(self, page_info):
-        return True, None
-
-
-class PyCharmActivity(Activity):
-    activity_name = "PyCharm"
-    main_rp_app_name = "test"
-    clear_delay_seconds = 60
-
-    def __init__(self, priority):
-        super().__init__(priority)
-
-    def _handle_update(self, page_info):
-        return True, UpdateInfo(
-            details="programming in python",
-            state=f"PYTHON",
-        )
-
-    def _handle_clean(self, page_info):
-        return True, None

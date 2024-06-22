@@ -1,0 +1,2 @@
+# Custom activities libraries
+mal-api~=0.5.3

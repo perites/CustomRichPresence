@@ -11,41 +11,35 @@
 #      TODO Instalasion gude
 # TODO extention for pycharm , using https://github.com/Almighty-Alpaca/JetBrains-Discord-Integration/tree/master ?
 
-
-import sys
 import os
+import sys
 
 import struct
 import json
 
 import logging
 
-confg_path_to_modules = '.venv\\Lib\\site-packages'
-site_packages = os.path.join(confg_path_to_modules)
-sys.path.insert(0, site_packages)
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s : %(message)s | func: %(funcName)s --- file: %(filename)s --- logger: %(name)s',
     datefmt='%d-%m-%y %H:%M:%S',
     filename="native_messaging_host.log",
     filemode='w', level=logging.DEBUG, encoding='utf-8')
-
 logging.getLogger("urllib3").setLevel(logging.ERROR)
 logging.getLogger("requests").setLevel(logging.ERROR)
 
-logging.getLogger("rpac").setLevel(logging.DEBUG)
-
+config_path_to_modules = '.venv\\Lib\\site-packages'
+site_packages = os.path.join(config_path_to_modules)
+sys.path.insert(0, site_packages)
 try:
     import config
     from RPActivityController import RichPresenceActivitiesController, RPAppsController, ActivitiesManager
-    from my_activities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity
+    from CustomActivities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity
 except Exception as exception:
     logging.exception(f"Failed to load modules, exiting")
     sys.exit(1)
 
 rpac = RichPresenceActivitiesController()
+
 rpac.set_activities_manager(
     ActivitiesManager(
         WatchingAnimeJoyActivity(2),

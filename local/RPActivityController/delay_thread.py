@@ -2,7 +2,11 @@ import threading
 import time
 
 from .logger import logger
-from .activities import ActivityInfo
+
+try:
+    from Activity import ActivityInfo
+except Exception as exception:
+    logger.exception(f"Failed to load external modules, exiting")
 
 
 class DelayManager:
