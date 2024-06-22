@@ -11,9 +11,10 @@ class DelayManager:
     ignore_activity_info = ActivityInfo(
         method="ignore",
 
-        activity_priority=-1,
+        name="DelayThread",
+        priority=-1,
         delay=-1,
-        app_name="DelayThread",
+        app_name="-"
     )
 
     def __init__(self):

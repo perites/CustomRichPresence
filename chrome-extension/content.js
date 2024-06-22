@@ -42,16 +42,14 @@ const sendData = (info, method, activity) => {
         activity: activity
     }
 
-    if (JSON.stringify(dataOld) === JSON.stringify(dataToSend) && (counter <= 10)) {
+    if (JSON.stringify(dataOld) === JSON.stringify(dataToSend)) {
         console.log("Data was not sent, identical to old")
-        counter++
         return
     }
 
     chrome.runtime.sendMessage(dataToSend)
     console.log("Sent data to background.js | Info :", info, "| Method :", method, "| Activity ", activity)
     dataOld = dataToSend
-    counter = 0;
 
 };
 
@@ -76,7 +74,6 @@ setTimeout(() => {
 
 
 let dataOld = "";
-let counter = 0;
 
 
 let updateIntervalId = setInterval(() => {

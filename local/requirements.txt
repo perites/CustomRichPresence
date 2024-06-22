@@ -1,5 +1,5 @@
 # RPActivityController libraries
--r RPActivityController/rpac-requirments.txt
+-r ..//RPActivityController/rpac-requirments.txt
 
 # Custom activities libraries
 mal-api~=0.5.3

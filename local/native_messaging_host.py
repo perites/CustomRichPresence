@@ -1,15 +1,14 @@
-# todo Activity manager buffer ?
 # TODO separate file using Sockets
 
+# todo function to add methods in Activity ?
 # TODO add time support for WatchingAnime
-
-# TODO add custom activity_name from popup.html
+# TODO add custom name from popup.html
 #   TODO manual current episode
 #   TODO button to clear status
-# TODO confg file
-#   TODO application ID setting
+
 # TODO support to youtube
-# TODO Instalasion gude
+# todo update readme
+#      TODO Instalasion gude
 # TODO extention for pycharm , using https://github.com/Almighty-Alpaca/JetBrains-Discord-Integration/tree/master ?
 
 
@@ -25,6 +24,8 @@ confg_path_to_modules = '.venv\\Lib\\site-packages'
 site_packages = os.path.join(confg_path_to_modules)
 sys.path.insert(0, site_packages)
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s : %(message)s | func: %(funcName)s --- file: %(filename)s --- logger: %(name)s',
     datefmt='%d-%m-%y %H:%M:%S',
@@ -37,24 +38,23 @@ logging.getLogger("requests").setLevel(logging.ERROR)
 logging.getLogger("rpac").setLevel(logging.DEBUG)
 
 try:
+    import config
     from RPActivityController import RichPresenceActivitiesController, RPAppsController, ActivitiesManager
-    from my_activities import WatchingAnimeJoyActivity, WatchingYoutubeActivity
-except Exception as e:
+    from my_activities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity
+except Exception as exception:
     logging.exception(f"Failed to load modules, exiting")
     sys.exit(1)
-
-config_apps = {"watching": "1250924979776786514",
-               "test": "1252626262346694686"}
 
 rpac = RichPresenceActivitiesController()
 rpac.set_activities_manager(
     ActivitiesManager(
         WatchingAnimeJoyActivity(2),
-        WatchingYoutubeActivity(1),
+        WatchingYoutubeActivity(2),
+        PyCharmActivity(1)
     ))
 
 rpac.set_rpapps_controller(
-    RPAppsController(config_apps)
+    RPAppsController(config.rich_presence_apps)
 )
 
 
@@ -76,7 +76,7 @@ def main():
 
             rpac.process_raw_data(json_data)
 
-        except Exception as e:
+        except Exception as exception:
             logging.exception(f"Caught exception in main loop")
 
 

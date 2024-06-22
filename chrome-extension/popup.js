@@ -1,11 +1,11 @@
 document.getElementById('sendButton').addEventListener('click', () => {
-    const priority = document.getElementById('activity').value;
+    const activity = document.getElementById('activity').value;
     const method = document.getElementById('method').value;
     const dataToSend = {
         action: "sendData",
-        info: priority,
+        info: "-",
         method: method,
-        activity: "WatchingYoutube"
+        activity: activity
     }
     chrome.runtime.sendMessage(dataToSend)
 });

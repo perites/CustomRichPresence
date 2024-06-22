@@ -1,15 +1,17 @@
-import logging
 import sys
 
-import urllib.parse
-
 from dataclasses import dataclass
+import urllib.parse
+import logging
+
+logger = logging.getLogger("custom_activities")
+logger.setLevel(logging.DEBUG)
 
 try:
     from RPActivityController import Activity, UpdateInfo
     from mal import Anime
-except Exception as e:
-    logging.exception(f"Failed to load external modules, exiting")
+except Exception as exception:
+    logger.exception(f"Failed to load external modules, exiting")
     sys.exit(1)
 
 
@@ -18,7 +20,7 @@ class WatchingAnimeJoyActivity(Activity):
     main_rp_app_name = "watching"
     clear_delay_seconds = 60
 
-    def __init__(self, priority=0):
+    def __init__(self, priority):
         super().__init__(priority)
         self.current_title = None
 
@@ -26,14 +28,14 @@ class WatchingAnimeJoyActivity(Activity):
         if (not isinstance(self.current_title, Title) or
                 self.current_title.mal_title_id != page_info['mal_title_id']):
             self.current_title = Title(page_info['mal_title_id'], page_info['title_name'], page_info['current_episode'])
-            logging.debug(f'Created new Title with page_info : {page_info}')
+            logger.debug(f'Created new Title with page_info : {page_info}')
 
         elif self.current_title.current_episode != page_info['current_episode']:
             self.current_title.current_episode = page_info['current_episode']
-            logging.debug(f'Updated Title current_episode: {page_info}')
+            logger.debug(f'Updated Title current_episode: {page_info}')
 
         # else:
-        #     logging.warning("No changes detected in page_info, returning False")
+        #     logger.warning("No changes detected in page_info, returning False")
         #     return False
 
         return True, UpdateInfo(
@@ -49,11 +51,11 @@ class WatchingAnimeJoyActivity(Activity):
 
     def _handle_clean(self, page_info):
         if not self.current_title or page_info['mal_title_id'] != self.current_title.mal_title_id:
-            logging.warning("Was not cleaned, current_title and title to clean are not the same")
+            logger.warning("Was not cleaned, current_title and title to clean are not the same")
             return False, None
 
+        logger.debug(f"Clearing current title: {self.current_title.title_name}")
         self.current_title = None
-        logging.debug(f"Clean method called on {self.main_rp_app_name}, current_title became None")
         return True, None
 
 
@@ -78,16 +80,34 @@ class Title:
 
 class WatchingYoutubeActivity(Activity):
     activity_name = "WatchingYoutube"
-    main_rp_app_name = "test"
+    main_rp_app_name = "watching"
     clear_delay_seconds = 60
 
-    def __init__(self, priority=0):
+    def __init__(self, priority):
         super().__init__(priority)
 
     def _handle_update(self, page_info):
         return True, UpdateInfo(
             details="watching_youtube",
             state=f"videos",
+        )
+
+    def _handle_clean(self, page_info):
+        return True, None
+
+
+class PyCharmActivity(Activity):
+    activity_name = "PyCharm"
+    main_rp_app_name = "test"
+    clear_delay_seconds = 60
+
+    def __init__(self, priority):
+        super().__init__(priority)
+
+    def _handle_update(self, page_info):
+        return True, UpdateInfo(
+            details="programming in python",
+            state=f"PYTHON",
         )
 
     def _handle_clean(self, page_info):
