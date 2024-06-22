@@ -1,4 +1,4 @@
-# RPActivityController libraries
+# RPActivitiesController libraries
 -r RPActivityController/rpac-requirments.txt
 
 # Custom Activities libraries

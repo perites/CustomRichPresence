@@ -53,6 +53,7 @@ class DelayManager:
 class DelayThread(threading.Thread):
     def __init__(self, run_time, target_function, target_activity_info, stop_thread):
         super().__init__()
+        self.daemon = True
         self.run_time = run_time
         self.target_function = target_function
         self.target_activity_info = target_activity_info

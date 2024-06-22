@@ -4,7 +4,7 @@ import sys
 from .logger import logger
 from .activities_manager import ActivitiesManager
 from .rp_apps_controller import RPAppsController
-from .delay_thread import DelayManager
+from .delay_manager import DelayManager
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
