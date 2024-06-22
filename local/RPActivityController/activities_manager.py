@@ -1,31 +1,13 @@
 import sys
 
 from dataclasses import dataclass, field
+
 from .logger import logger
 
-
-@dataclass(frozen=True)
-class UpdateInfo:
-    details: str
-    state: str
-
-    start: int = None
-    party_size: list[int] = None
-    large_image: str = None
-    large_text: str = None
-    buttons: list[dict[str, str]] = None
-
-
-@dataclass(frozen=True)
-class ActivityInfo:
-    method: str
-
-    name: str
-    priority: int
-    delay: int
-    app_name: str
-
-    data: UpdateInfo = None
+try:
+    from Activity import Activity, ActivityInfo
+except Exception as exception:
+    logger.exception(f"Failed to load external modules, exiting")
 
 
 @dataclass(frozen=False)
@@ -106,21 +88,21 @@ class ActivitiesManager:
                     self.current_activity_info = activity_info
                     response_activity_info = activity_info
 
-                    logger.debug("No current activity info, set new")
+                    logger.info("No current activity info, set new")
 
                 elif activity_info.priority >= self.current_activity_info.priority:
-                    logger.debug(
+                    logger.info(
                         f"Updating current activity, activity info has higher or same priority")
 
                     if self.current_activity_info.name != activity_info.name:
                         self.activity_info_buffer.put(self.current_activity_info)
-                        logger.debug("Putting current activity info to buffer")
+                        logger.info("Putting current activity info to buffer")
 
                     self.current_activity_info = activity_info
                     response_activity_info = activity_info
 
                 else:
-                    logger.debug("New activity info has lower priority, putting to buffer and ignoring")
+                    logger.info("New activity info has lower priority, putting to buffer and ignoring")
                     self.activity_info_buffer.put(activity_info)
                     response_activity_info = self.ignore_activity_info
 
@@ -134,20 +116,20 @@ class ActivitiesManager:
                     if buffer_activity_info:
                         self.current_activity_info = buffer_activity_info
                         response_activity_info = buffer_activity_info
-                        logger.debug("Found activity in _buffer, updating rp with it")
+                        logger.info("Found activity in _buffer, updating rp with it")
 
                     else:
                         self.current_activity_info = None
                         response_activity_info = activity_info
-                        logger.debug("Clearing current activity, nothing in _buffer")
+                        logger.info("Clearing current activity, nothing in _buffer")
 
                 else:
                     result = self.activity_info_buffer.clear(activity_info)
                     if result:
-                        logger.debug("Activity cleared in buffer")
+                        logger.info("Activity cleared in buffer")
 
                     else:
-                        logger.debug("Activity not active, not in _buffer, ignoring")
+                        logger.warning("Activity not active, not in _buffer, ignoring")
 
                     response_activity_info = self.ignore_activity_info
 
@@ -157,55 +139,3 @@ class ActivitiesManager:
                     f"Wrong method '{activity_info.method}' in activity info, ignoring")
 
         return response_activity_info
-
-
-class Activity:
-    activity_name = NotImplemented
-    clear_delay_seconds = None
-    max_idle_minutes = NotImplemented
-    main_rp_app_name = NotImplemented
-
-    def __init__(self, priority):
-        self.priority = priority
-
-        self.validate_clear_delay()
-        self.started_at = None
-        self.last_clean_call = None
-        self.last_update_call = None
-
-        self.handled_methods = {"clear": self._handle_clean,
-                                "update": self._handle_update}
-
-    def validate_clear_delay(self):
-        if self.clear_delay_seconds:
-            try:
-                int(self.clear_delay_seconds)
-            except ValueError:
-                logger.error(f"Clear delay must be an integer")
-                sys.exit(1)
-
-            if self.clear_delay_seconds < 1:
-                logger.error("Clear delay must be greater than one second. Use None to disable delay.")
-                sys.exit(1)
-
-    def handle(self, method, data) -> ActivityInfo:
-        logger.debug(f"Need to handle method : {method}")
-
-        success, data = self.handled_methods[method](data)
-
-        return ActivityInfo(
-            method=method if success else "ignore",
-
-            name=self.activity_name,
-            priority=self.priority,
-            delay=self.clear_delay_seconds,
-            app_name=self.main_rp_app_name,
-
-            data=data
-        )
-
-    def _handle_update(self, data) -> (bool, UpdateInfo):
-        raise NotImplementedError
-
-    def _handle_clean(self, data) -> (bool, None):
-        raise NotImplementedError

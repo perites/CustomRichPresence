@@ -1,9 +1,17 @@
+import os
 import sys
 
-from .activities import Activity, ActivitiesManager, UpdateInfo
+from .logger import logger
+from .activities_manager import ActivitiesManager
 from .rp_apps_controller import RPAppsController
 from .delay_thread import DelayManager
-from .logger import logger
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+try:
+    from Activity import Activity
+except Exception as exception:
+    logger.exception(f"Failed to load external modules, exiting")
 
 
 class RichPresenceActivitiesController:
