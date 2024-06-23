@@ -4,7 +4,7 @@ import time
 from .logger import logger
 
 try:
-    from Activity import ActivityInfo
+    from .activity import ActivityInfo
 except Exception as exception:
     logger.exception(f"Failed to load external modules, exiting")
 

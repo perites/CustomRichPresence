@@ -15,17 +15,22 @@ import queue
 import logging
 
 logging.basicConfig(
-    format='%(asctime)s [%(levelname)s] : %(message)s \/ [LOGGER:%(name)s] [FUNC:%(funcName)s] [FILE:%(filename)s]',
+    format='%(asctime)s [%(levelname)s] : %(message)s  ||[LOGGER:%(name)s] [FUNC:%(funcName)s] [FILE:%(filename)s]',
     datefmt='%H:%M:%S',
-    filename="rp_activities_server.log",
-    filemode='w', level=logging.DEBUG, encoding='utf-8')
+    level=logging.DEBUG,
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("main.log", mode='w', encoding='utf-8', )
+    ]
+)
+
 logging.getLogger("urllib3").setLevel(logging.ERROR)
 logging.getLogger("requests").setLevel(logging.ERROR)
 
 try:
     import config
     from Server import Server
-    from RPActivitiesController import RichPresenceActivitiesController, RPAppsController, ActivitiesManager
+    from rpac import RichPresenceActivitiesController
     from CustomActivities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity
 except Exception as exception:
     logging.exception(f"Failed to load modules, exiting")
@@ -35,33 +40,18 @@ data_queue = queue.Queue()
 
 server = Server(config.server['port'], config.server['server_ip'], data_queue)
 
-rpac = RichPresenceActivitiesController()
-rpac.set_activities_manager(
-    ActivitiesManager(
-        WatchingAnimeJoyActivity(2),
-        WatchingYoutubeActivity(2),
-        PyCharmActivity(1)
-    ))
-rpac.set_rpapps_controller(
-    RPAppsController(config.rich_presence_apps)
+rpac = RichPresenceActivitiesController(data_queue)
+rpac.set_activities(
+    WatchingAnimeJoyActivity(2),
+    WatchingYoutubeActivity(2),
+    PyCharmActivity(1),
 )
-
-
-def start_processing_data_from_queue():
-    while True:
-        try:
-            json_data = data_queue.get()
-            logging.debug(f"New data in queue, processing")
-            rpac.process_raw_data(json_data)
-
-        except Exception as exception:
-            logging.exception(f"Failed to process data '{json_data}'")
-
+rpac.set_rich_presence_apps(config.rich_presence_apps)
 
 if __name__ == '__main__':
     try:
-        server.start_handling_clients()
-        start_processing_data_from_queue()
+        server.start_handling_clients(daemon=True)
+        rpac.start_processing_data_from_queue(daemon=False)
     except Exception as e:
         logging.critical(f"Error in file, script ended")
         logging.exception(e)

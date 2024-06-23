@@ -1,5 +1,4 @@
-/local/.venv/
-/local/rp_activities_server.log.log
-/local/config.py
 /chrome-extension/native_messages_proxy.log
-/local/rp_activities_server.log
+/local/.venv/
+/local/config.py
+/local/main.log

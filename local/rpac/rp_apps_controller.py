@@ -10,9 +10,9 @@ except (ModuleNotFoundError or ImportError) as exception:
 
 
 class RPAppsController:
-    def __init__(self, apps):
+    def __init__(self, raw_apps):
         try:
-            self.apps = {name: Presence(app_id) for name, app_id in apps.items()}
+            self.apps = {name: Presence(app_id) for name, app_id in raw_apps.items()}
         except Exception as exception:
             logger.exception(
                 "Exception while initializing RPAppsController, couldn`t made Presence object, most likely wrong ID")

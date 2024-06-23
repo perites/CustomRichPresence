@@ -1,5 +1,5 @@
 const sendData = (info, method, activity) => {
-    const data = {"info": info, "method": method, "activity": activity}
+    const data = {"info": info, "method": method, "activity_name": activity}
 
     port.postMessage(data);
     console.log("Data sent to Native Message Host | Data :", data)
@@ -16,7 +16,7 @@ port.onDisconnect.addListener(() => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "sendData") {
-        console.log("Received data from content.js, proceed | Info :", message.info, "| Method :", "| Activity ", message.activity)
+        console.log("Received data from content.js, proceed | Info :", message.info, "| Method :", "| Activity_DONT_NEED ", message.activity)
         await sendData(message.info, message.method, message.activity)
     }
 });

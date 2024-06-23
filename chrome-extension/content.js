@@ -48,7 +48,7 @@ const sendData = (info, method, activity) => {
     }
 
     chrome.runtime.sendMessage(dataToSend)
-    console.log("Sent data to background.js | Info :", info, "| Method :", method, "| Activity ", activity)
+    console.log("Sent data to background.js | Info :", info, "| Method :", method, "| Activity_DONT_NEED ", activity)
     dataOld = dataToSend
 
 };

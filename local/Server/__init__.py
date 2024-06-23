@@ -22,8 +22,8 @@ class Server:
                 message = conn.recv(message_length).decode('utf-8')
 
                 json_data = json.loads(message)
-                logger.debug(f"Got new data: {json_data} from {addr}")
                 data_queue.put(json_data)
+                logger.debug(f"Got new data: {json_data} from {addr}")
 
             except Exception as exception:
                 logger.exception(f"Error while receiving data from '{addr}'")
@@ -31,10 +31,14 @@ class Server:
     def _start_handling_clients(self):
         self.server.listen()
         while True:
-            conn, addr = self.server.accept()
-            threading.Thread(target=self.handle_client, args=(conn, addr, self.data_queue), daemon=True).start()
-            logger.info(f"New connection established '{addr}'. New thread started to handle")
+            try:
+                conn, addr = self.server.accept()
+                threading.Thread(target=self.handle_client, args=(conn, addr, self.data_queue), daemon=True).start()
+                logger.info(f"New connection established '{addr}'. New thread started to handle")
 
-    def start_handling_clients(self):
-        threading.Thread(target=self._start_handling_clients, daemon=True).start()
-        logger.info(f"Server started to handle clients")
+            except Exception as exception:
+                logger.exception(f"Error while accepting connection")
+
+    def start_handling_clients(self, daemon):
+        threading.Thread(target=self._start_handling_clients, daemon=daemon).start()
+        logger.info(f"Server started")

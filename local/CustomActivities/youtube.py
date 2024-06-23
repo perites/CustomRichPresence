@@ -3,7 +3,7 @@ import sys
 from .logger import logger
 
 try:
-    from Activity import Activity, UpdateInfo
+    from rpac import Activity, UpdateInfo
 except Exception as exception:
     logger.exception(f"Failed to load external modules, exiting")
     sys.exit(1)

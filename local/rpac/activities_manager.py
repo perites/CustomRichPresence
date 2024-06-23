@@ -2,12 +2,10 @@ import sys
 
 from dataclasses import dataclass, field
 
-from .logger import logger
+from .activity import Activity
+from .custom_dataclasses import ActivityInfo
 
-try:
-    from Activity import Activity, ActivityInfo
-except Exception as exception:
-    logger.exception(f"Failed to load external modules, exiting")
+from .logger import logger
 
 
 @dataclass(frozen=False)
@@ -52,6 +50,9 @@ class ActivitiesManager:
         self.current_activity_info = None
         self.activities = self.set_activities(*raw_activities)
 
+        # self.handleed_methods = {"ignore": self._handle_ignore,
+        #                          "update": ""}
+
     @staticmethod
     def set_activities(*raw_activities):
         activities = {}
@@ -60,22 +61,23 @@ class ActivitiesManager:
             if not isinstance(activity, Activity):
                 logger.error(f"ActivitiesManager got wrong type: {type(activity)}. Must be Activity type")
                 sys.exit(1)
-            try:
-                int(activity.priority)
-            except ValueError:
-                logger.error(f"Activity`s priority must be an integer")
-                sys.exit(1)
 
             activities[activity.activity_name] = activity
 
         logger.debug(f"Activities manager initialized with {len(activities)} activities")
         return activities
 
-    def activity_handle(self, activity_name, method, info) -> ActivityInfo:
-        new_activity_info = self.activities[activity_name].handle(method, info)
+    def handle_data(self, activity_name, method, info) -> ActivityInfo:
+        activity_info = self.activities[activity_name].handle(method, info)
 
-        result = self.process_activity_info(new_activity_info)
+        result = self.process_activity_info(activity_info)
+        # result = self.handleed_methods[method](new_activity_info)
+
         return result
+
+    def _handle_ignore(self, activity_info):
+        logger.debug("Got activity method 'ignore', proceed")
+        return activity_info
 
     def process_activity_info(self, activity_info) -> ActivityInfo:
         match activity_info.method:
@@ -126,10 +128,10 @@ class ActivitiesManager:
                 else:
                     result = self.activity_info_buffer.clear(activity_info)
                     if result:
-                        logger.info("Activity cleared in buffer")
+                        logger.info("Activity_DONT_NEED cleared in buffer")
 
                     else:
-                        logger.warning("Activity not active, not in _buffer, ignoring")
+                        logger.warning("Activity_DONT_NEED not active, not in _buffer, ignoring")
 
                     response_activity_info = self.ignore_activity_info
 

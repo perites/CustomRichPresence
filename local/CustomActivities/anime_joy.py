@@ -6,7 +6,7 @@ import urllib.parse
 from .logger import logger
 
 try:
-    from Activity import Activity, UpdateInfo
+    from rpac import Activity, UpdateInfo
     from mal import Anime
 except Exception as exception:
     logger.exception(f"Failed to load external modules, exiting")

@@ -6,7 +6,7 @@ class UpdateInfo:
     details: str
     state: str
 
-    start: int = None
+    start: int = None  # delete start
     party_size: list[int] = None
     large_image: str = None
     large_text: str = None
@@ -22,4 +22,5 @@ class ActivityInfo:
     delay: int
     app_name: str
 
+    # start_time
     data: UpdateInfo = None
