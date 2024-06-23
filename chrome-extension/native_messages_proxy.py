@@ -1,9 +1,10 @@
 import sys
 
-import logging
-import struct
-
 import socket
+import struct
+import time
+
+import logging
 
 PORT = 13370
 SERVER = "127.0.0.1"
@@ -16,14 +17,21 @@ logging.basicConfig(
     filemode='w', level=logging.DEBUG, encoding='utf-8')
 
 
-def try_connect_to_server():
-    try:
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(SERVER_ADDR)
-        return client
-    except Exception as exception:
-        logging.exception("Error while connecting to server")
-        sys.exit(1)
+def wait_until_connect():
+    while True:
+        try:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect(SERVER_ADDR)
+            logging.info("Connected to server")
+            return client
+        
+        except Exception as exception:
+            logging.error("Error while connecting to server, trying again in 5 seconds")
+            client.close()
+
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            time.sleep(10)
 
 
 def send_message_to_server(message, client):
@@ -41,7 +49,7 @@ def get_native_message():
 
 
 def main():
-    client = try_connect_to_server()
+    client = wait_until_connect()
     while True:
         try:
             message = get_native_message()
@@ -49,11 +57,13 @@ def main():
             try:
                 send_message_to_server(message, client)
             except ConnectionResetError:
-                client = try_connect_to_server()
+                client = wait_until_connect()
                 logging.warning("Connection was reestablished")
+
                 send_message_to_server(message, client)
 
             logging.debug(f"Message sent to server")
+
         except Exception as exception:
             logging.exception("Error while sending message to server, message not sent")
 
