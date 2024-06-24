@@ -31,7 +31,6 @@ class RichPresenceActivitiesController:
         # case GET_INFO
         activity_info = self.activities_manager.handle_data(activity_name=data['activity_name'], method=data['method'],
                                                             info=data['info'])
-
         activity_info = self.delay_manager.process_activity_info(activity_info)
 
         self.rpapps_controller.change_state(activity_info)
@@ -41,7 +40,7 @@ class RichPresenceActivitiesController:
             try:
                 data = self.data_queue.get()
                 self.process_raw_data(data)
-                
+
             except Exception as exception:
                 logger.exception("Error while processing data from queue")
 

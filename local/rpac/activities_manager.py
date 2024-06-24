@@ -50,9 +50,6 @@ class ActivitiesManager:
         self.current_activity_info = None
         self.activities = self.set_activities(*raw_activities)
 
-        # self.handleed_methods = {"ignore": self._handle_ignore,
-        #                          "update": ""}
-
     @staticmethod
     def set_activities(*raw_activities):
         activities = {}
@@ -68,16 +65,15 @@ class ActivitiesManager:
         return activities
 
     def handle_data(self, activity_name, method, info) -> ActivityInfo:
+        if (not self.current_activity_info) and (method == "clear"):
+            logger.warning("Attempt to clear, but no active activity, ignoring")
+            return self.ignore_activity_info
+
         activity_info = self.activities[activity_name].handle(method, info)
 
         result = self.process_activity_info(activity_info)
-        # result = self.handleed_methods[method](new_activity_info)
 
         return result
-
-    def _handle_ignore(self, activity_info):
-        logger.debug("Got activity method 'ignore', proceed")
-        return activity_info
 
     def process_activity_info(self, activity_info) -> ActivityInfo:
         match activity_info.method:
@@ -128,10 +124,10 @@ class ActivitiesManager:
                 else:
                     result = self.activity_info_buffer.clear(activity_info)
                     if result:
-                        logger.info("Activity_DONT_NEED cleared in buffer")
+                        logger.info("Activity cleared in buffer")
 
                     else:
-                        logger.warning("Activity_DONT_NEED not active, not in _buffer, ignoring")
+                        logger.warning("Activity not active, not in _buffer, ignoring")
 
                     response_activity_info = self.ignore_activity_info
 

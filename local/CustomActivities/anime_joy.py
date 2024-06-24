@@ -16,7 +16,11 @@ except Exception as exception:
 class WatchingAnimeJoyActivity(Activity):
     activity_name = "WatchingAnimeJoy"
     main_rp_app_name = "watching"
+
     clear_delay_seconds = 60
+
+    max_seconds_after = {"clear": 60 * 10,
+                         "update": 60 * 30, }
 
     def __init__(self, priority):
         super().__init__(priority)
@@ -32,6 +36,11 @@ class WatchingAnimeJoyActivity(Activity):
             self.current_title.current_episode = page_info['current_episode']
             logger.debug(f'Updated Title current_episode: {page_info}')
 
+        if self.current_title.media_type == "Movie":
+            self.max_seconds_after['update'] = 60 * 180
+        else:
+            self.max_seconds_after['update'] = 60 * 30
+
         # else:
         #     logger.warning("No changes detected in page_info, returning False")
         #     return False
@@ -40,6 +49,7 @@ class WatchingAnimeJoyActivity(Activity):
             details=self.current_title.title_name,
             state=f"{self.current_title.media_type}, episode",
             party_size=[self.current_title.current_episode, self.current_title.episodes_amount],
+            start=self.get_start_time(),
             large_image=self.current_title.poster_url,
             large_text="Poster",
             buttons=[{"label": "Page on MAL", "url": self.current_title.url_to_mal},

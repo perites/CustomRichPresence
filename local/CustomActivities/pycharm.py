@@ -12,7 +12,11 @@ except Exception as exception:
 class PyCharmActivity(Activity):
     activity_name = "PyCharm"
     main_rp_app_name = "test"
+
     clear_delay_seconds = 60
+
+    max_seconds_after = {"clear": 60,
+                         "update": 60}
 
     def __init__(self, priority):
         super().__init__(priority)

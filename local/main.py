@@ -1,4 +1,3 @@
-# TODO add time support for Activities
 # TODO add custom name from popup.html
 #   TODO manual current episode
 #   TODO button to clear status
