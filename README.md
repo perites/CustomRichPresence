@@ -12,7 +12,7 @@ to a server. There are two main methods for communication:
 
 The data follows this path from the server to be shown in RP:
 
-1. Custom Activity
+1. **Custom Activity**
     - Process data directly from application
     - You have complete freedom to process this data since you are writing a CustomActivity
     - Sends processed data to RPAC
@@ -45,6 +45,20 @@ The data follows this path from the server to be shown in RP:
 
 - **Clear Delay**: Ensures RP is not immediately cleared after a `clear` command, allowing for potential updates to
   another activity rather than clearing RP completely.
+
+## Applications that Send Data
+
+### Chrome Extension
+
+This extension collects necessary data from websites and sends it
+to [`native_messages_proxy.py`](https://github.com/perites/CustomRichPresence/blob/master/chrome-extension/native_messages_proxy.py)
+using Chrome Native Messages.
+The [`native_messages_proxy.py`](https://github.com/perites/CustomRichPresence/blob/master/chrome-extension/native_messages_proxy.py)
+script then forwards the data to the main server via the TCP protocol.
+
+The extension gathers information from the following websites:
+
+- [animejoy.ru](http://animejoy.ru/)
 
 ## To-Do List
 
