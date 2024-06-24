@@ -29,6 +29,9 @@ class RichPresenceActivitiesController:
         # match REQUEST :
         # case UPDATE_RP
         # case GET_INFO
+        self.process_update_rp_data(data)
+
+    def process_update_rp_data(self, data):
         activity_info = self.activities_manager.handle_data(activity_name=data['activity_name'], method=data['method'],
                                                             info=data['info'])
         activity_info = self.delay_manager.process_activity_info(activity_info)

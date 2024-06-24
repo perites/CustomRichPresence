@@ -50,7 +50,9 @@ rpac.set_rich_presence_apps(config.rich_presence_apps)
 if __name__ == '__main__':
     try:
         server.start_handling_clients(daemon=True)
-        rpac.start_processing_data_from_queue(daemon=False)
+        rpac.start_processing_data_from_queue(daemon=True)
+        while True:
+            pass
     except Exception as e:
         logging.critical(f"Error in file, script ended")
         logging.exception(e)

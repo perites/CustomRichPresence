@@ -33,18 +33,20 @@ class Activity:
         for k, v in self.max_seconds_after.items():
             self.validate(v, 1, f"Max_seconds_after[{k}]")
 
-    @staticmethod
-    def validate(variable_to_validate, min_value, variable_name, disable=True):
+    def validate(self, variable_to_validate, min_value, variable_name, disable=True):
         try:
+            if disable and (not variable_to_validate):
+                return variable_to_validate
+
             variable_to_validate = int(variable_to_validate)
             if variable_to_validate <= min_value:
                 raise ValueError
 
             return variable_to_validate
-        except ValueError:
+        except Exception as exception:
             disable_str = "Use None to disable it" if disable else ""
             logger.error(
-                f"{variable_name} must be an integer and greater than {min_value}. {disable_str}")
+                f"{self.activity_name} : {variable_name} must be an integer and greater than {min_value}. {disable_str}")
 
             sys.exit(1)
 
