@@ -1,17 +1,17 @@
+# TODO extension for pycharm , using https://github.com/Almighty-Alpaca/JetBrains-Discord-Integration/tree/master ?
 # TODO add custom name from popup.html
 #   TODO manual current episode
 #   TODO button to clear status
 
 # TODO support to youtube
-# todo update readme
-#      TODO Instalasion gude
-# TODO extention for pycharm , using https://github.com/Almighty-Alpaca/JetBrains-Discord-Integration/tree/master ?
+# TODO Instalasion gude
 
 import sys
 
 import queue
 
 import logging
+import time
 
 logging.basicConfig(
     format='%(asctime)s [%(levelname)s] : %(message)s  ||[LOGGER:%(name)s] [FUNC:%(funcName)s] [FILE:%(filename)s]',
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         server.start_handling_clients(daemon=True)
         rpac.start_processing_data_from_queue(daemon=True)
         while True:
-            pass
+            time.sleep(60)
     except Exception as e:
         logging.critical(f"Error in file, script ended")
         logging.exception(e)
