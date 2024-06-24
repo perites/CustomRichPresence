@@ -4,7 +4,7 @@
 #   TODO button to clear status
 
 # TODO support to youtube
-# TODO Instalasion gude
+# TODO Instalasion gude to RPAC
 
 import sys
 
