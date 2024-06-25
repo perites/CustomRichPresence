@@ -19,8 +19,8 @@ class WatchingAnimeJoyActivity(Activity):
 
     clear_delay_seconds = 60
 
-    max_seconds_after = {"clear": 60 * 10,
-                         "update": 60 * 30, }
+    max_seconds_after = {"clear": 60 * 20,
+                         "update": 60 * 40, }
 
     def __init__(self, priority):
         super().__init__(priority)

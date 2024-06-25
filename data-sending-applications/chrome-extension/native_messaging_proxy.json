@@ -4,6 +4,6 @@
   "path": "native_messages_proxy.py",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://lppnhealhbboabiopnnjmdfhkdlhmfij/"
+    "chrome-extension://hpnbmiaegjolihnhgkbnkpegepfkppmj/"
   ]
 }

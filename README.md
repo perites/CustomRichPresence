@@ -46,7 +46,7 @@ The data follows this path from the server to be shown in RP:
 - **Clear Delay**: Ensures RP is not immediately cleared after a `clear` command, allowing for potential updates to
   another activity rather than clearing RP completely.
 
-# Applications that Send Data
+# Data-Sending Applications
 
 ## Chrome Extension
 
