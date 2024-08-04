@@ -82,5 +82,5 @@ class Title:
         self.poster_url = self.mal_title.image_url
         self.media_type = self.mal_title.type
 
-        self.url_to_mal = self.mal_title.url
+        self.url_to_mal = "https://myanimelist.net/anime/" + str(self.mal_title_id)
         self.url_to_progress = f"https://myanimelist.net/animelist/perite?s={urllib.parse.quote(self.title_name or self.raw_title_name)}"

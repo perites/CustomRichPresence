@@ -24,7 +24,7 @@ def wait_until_connect():
             client.connect(SERVER_ADDR)
             logging.info("Connected to server")
             return client
-        
+
         except Exception as exception:
             logging.error("Error while connecting to server, trying again in 5 seconds")
             client.close()
@@ -35,8 +35,10 @@ def wait_until_connect():
 
 
 def send_message_to_server(message, client):
-    client.send(str(len(message)).encode("utf-8").ljust(64))
-    client.send(message.encode("utf-8"))
+    encoded_message = message.encode("utf-8")
+    client.send(str(len(encoded_message)).encode("utf-8").ljust(64))
+    client.send(encoded_message)
+    logging.debug(f"Message sent to server")
 
 
 def get_native_message():
@@ -62,7 +64,7 @@ def main():
 
                 send_message_to_server(message, client)
 
-            logging.debug(f"Message sent to server")
+
 
         except Exception as exception:
             logging.exception("Error while sending message to server, message not sent")
