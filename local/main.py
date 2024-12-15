@@ -30,7 +30,7 @@ try:
     import config
     from Server import Server
     from rpac import RichPresenceActivitiesController
-    from CustomActivities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity
+    from CustomActivities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity, GeoguessrActivity
 except Exception as exception:
     logging.exception(f"Failed to load modules, exiting")
     sys.exit(1)
@@ -43,6 +43,7 @@ rpac = RichPresenceActivitiesController(data_queue)
 rpac.set_activities(
     WatchingAnimeJoyActivity(2),
     WatchingYoutubeActivity(2),
+    GeoguessrActivity(2),
     PyCharmActivity(1),
 )
 rpac.set_rich_presence_apps(config.rich_presence_apps)
