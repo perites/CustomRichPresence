@@ -23,8 +23,8 @@ class RPAppsController:
 
     def change_state(self, activity_info):
         if self.previous_activity_info == activity_info:
-            logger.info("New data identical to previous, no changes done")
-            return
+            logger.info("New data identical to previous, continuing")
+            # return
 
         if (not activity_info.method == "ignore") and (not self.apps.get(activity_info.app_name)):
             logger.error(f"App '{activity_info.app_name}' does not exist")

@@ -5,12 +5,10 @@
   "content_scripts": [
     {
       "matches": [
-        "https://animejoy.ru/tv-serialy/*",
-        "https://animejoy.ru/anime-films/*",
-        "https://animejoy.ru/ova/*"
+        "https://animejoy.site/*"
       ],
       "js": [
-        "Content.js"
+        "content_CRP.js"
       ]
     }
   ],

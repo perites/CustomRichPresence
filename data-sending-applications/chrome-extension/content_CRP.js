@@ -6,7 +6,7 @@ const getCurrentEpisode = () => {
     const playlistContainer = document.getElementsByClassName("playlists-videos")[0];
     const listItems = playlistContainer.getElementsByTagName("ul")[0];
     const listArrayRaw = Array.from(listItems.children);
-    const listArray = listArrayRaw.filter(item => item.getAttribute("data-file").startsWith("https://video.sibnet.ru/"));
+    const listArray = listArrayRaw.filter(item => item.getAttribute("data-file").startsWith("https://iv.sibnet.ru/"));
 
     let current_episode = -1;
     for (let i = 0; i < listArray.length; i++) {
@@ -41,7 +41,7 @@ const sendData = (info, method, activity) => {
         method: method,
         activity: activity
     }
-
+    console.log(dataToSend, dataOld)
     if (JSON.stringify(dataOld) === JSON.stringify(dataToSend)) {
         console.log("Data was not sent, identical to old")
         return
@@ -54,10 +54,12 @@ const sendData = (info, method, activity) => {
 };
 
 const sendDataUpdate = () => {
+    console.log("uopdate")
     sendData(getInfoFromPage(), "update", "WatchingAnimeJoy");
 }
 
 const sendDataClear = () => {
+    console.log("before")
     sendData(getInfoFromPage(), "clear", "WatchingAnimeJoy");
 
 }
@@ -100,5 +102,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('beforeunload', () => {
+    console.log("before")
     sendDataClear();
 })

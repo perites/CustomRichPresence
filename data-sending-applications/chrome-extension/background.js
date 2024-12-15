@@ -16,7 +16,7 @@ port.onDisconnect.addListener(() => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "sendData") {
-        console.log("Received data from content.js, proceed | Info :", message.info, "| Method :", "| Activity :", message.activity)
+        console.log("Received data from content_CRP.js, proceed | Info :", message.info, "| Method :", "| Activity :", message.activity)
         await sendData(message.info, message.method, message.activity)
     }
 });
