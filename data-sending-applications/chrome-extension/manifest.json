@@ -5,7 +5,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://animejoy.site/*"
+        "https://animejoy.site/*",
+        "https://www.geoguessr.com/*"
       ],
       "js": [
         "content_CRP.js"
@@ -23,8 +24,8 @@
     "nativeMessaging"
   ],
   "icons": {
-    "48": "logo_anime_joy.png",
-    "128": "logo_anime_joy.png"
+    "48": "logo.png",
+    "128": "logo.png"
   }
 }
 
