@@ -73,7 +73,7 @@ class Activity:
         raise NotImplementedError
 
     def _handle_clean(self, data) -> (bool, None):
-        raise NotImplementedError
+        return True, None
 
     def get_start_time(self):
         self.update_start_time()

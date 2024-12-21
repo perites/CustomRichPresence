@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class UpdateInfo:
-    details: str
-    state: str
+    details: str = None
+    state: str = None
 
     start: int = None
     party_size: list[int] = None
