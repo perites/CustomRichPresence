@@ -23,8 +23,10 @@ class RPAppsController:
 
     def change_state(self, activity_info):
         if self.previous_activity_info == activity_info:
-            logger.info("New data identical to previous, continuing")
-            # return
+            logger.warning("New data identical to previous, no changes done")
+            return
+
+        self.previous_activity_info = activity_info
 
         if (not activity_info.method == "ignore") and (not self.apps.get(activity_info.app_name)):
             logger.error(f"App '{activity_info.app_name}' does not exist")
@@ -54,15 +56,12 @@ class RPAppsController:
                         f"App that need to be cleared is NOT connected | App name : {activity_info.app_name}")
                     return
                 self.apps[self.connected_rp_app_name].clear()
-                self.previous_activity_info = None
+                # self.previous_activity_info = None
                 logger.info(f"Cleared RP for app : {self.connected_rp_app_name}")
 
             case "ignore":
                 logger.debug("Got 'ignore' method, no changes done")
                 return
-
             case _:
                 logger.warning(f"Wrong method in state info '{activity_info.method}'")
                 return
-
-        self.previous_activity_info = activity_info

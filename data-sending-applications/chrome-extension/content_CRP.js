@@ -49,17 +49,56 @@ class Activity {
         console.error("stopSending was not implemented")
     }
 }
-
-class WatchingAnimeJoy extends Activity {
+class WatchingAnime extends Activity{
     constructor() {
-        super("WatchingAnimeJoy")
-        this.titleName = this.findTitleName();
-        this.MALTitleID = this.getMALTitleId();
+        super("WatchingAnime")
+        setTimeout(() => {
+            this.titleName = this.findTitleName();
+            this.MALTitleID = this.getMALTitleId();
+        }, 0);
 
         this.updateIntervalId = NaN;
 
     }
 
+    get currentEpisode() {
+         console.error("currentEpisode() was not implemented")
+    }
+
+    findTitleName = () => {
+         console.error("findTitleName was not implemented")
+    };
+
+    getMALTitleId = () => {
+        console.error("getMALTitleId was not implemented")
+    };
+
+
+
+
+    get titleInfo() {
+        return {
+            "title_name": this.titleName,
+            "current_episode": this.currentEpisode,
+            "mal_title_id": this.MALTitleID
+        };
+    }
+
+    startSending = () => {
+        this.updateIntervalId = setInterval(() => {
+            this.sendDataToCRP(this.titleInfo, "update");
+        }, 5000);
+    }
+
+    stopSending = () => {
+        clearInterval(this.updateIntervalId);
+        this.sendDataToCRP(this.titleInfo, "clear");
+    }
+
+}
+
+
+class WatchingAnimeJoy extends WatchingAnime {
     get currentEpisode() {
         const playlistContainer = document.getElementsByClassName("playlists-videos")[0];
         const listItems = playlistContainer.getElementsByTagName("ul")[0];
@@ -75,13 +114,6 @@ class WatchingAnimeJoy extends Activity {
         }
     }
 
-    get titleInfo() {
-        return {
-            "title_name": this.titleName,
-            "current_episode": this.currentEpisode,
-            "mal_title_id": this.MALTitleID
-        };
-    }
 
     findTitleName = () => {
         return document.getElementsByClassName('romanji')[0].textContent
@@ -95,18 +127,6 @@ class WatchingAnimeJoy extends Activity {
             }
         }
     };
-
-
-    startSending = () => {
-        this.updateIntervalId = setInterval(() => {
-            this.sendDataToCRP(this.titleInfo, "update");
-        }, 5000);
-    }
-
-    stopSending = () => {
-        clearInterval(this.updateIntervalId);
-        this.sendDataToCRP(this.titleInfo, "clear");
-    }
 }
 
 
@@ -233,6 +253,7 @@ window.addEventListener("load", () => {
     const hostName = (window.location.hostname).split(".").reverse()[1]
     let act;
     switch (hostName) {
+        case "anime-joy":
         case "animejoy":
             act = new WatchingAnimeJoy();
             break;

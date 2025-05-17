@@ -30,7 +30,7 @@ try:
     import config
     from Server import Server
     from rpac import RichPresenceActivitiesController
-    from CustomActivities import WatchingAnimeJoyActivity, WatchingYoutubeActivity, PyCharmActivity, GeoguessrActivity
+    from CustomActivities import WatchingAnimeActivity, WatchingYoutubeActivity, PyCharmActivity, GeoguessrActivity
 except Exception as exception:
     logging.exception(f"Failed to load modules, exiting")
     sys.exit(1)
@@ -41,7 +41,7 @@ server = Server(config.server['port'], config.server['server_ip'], data_queue)
 
 rpac = RichPresenceActivitiesController(data_queue)
 rpac.set_activities(
-    WatchingAnimeJoyActivity(2),
+    WatchingAnimeActivity(2),
     WatchingYoutubeActivity(2),
     GeoguessrActivity(2),
     PyCharmActivity(1),

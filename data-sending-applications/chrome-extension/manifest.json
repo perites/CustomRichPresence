@@ -6,7 +6,8 @@
     {
       "matches": [
         "https://animejoy.site/*",
-        "https://www.geoguessr.com/*"
+        "https://www.geoguessr.com/*",
+        "https://anime-joy.online/*"
       ],
       "js": [
         "content_CRP.js"

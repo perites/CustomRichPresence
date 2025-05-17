@@ -13,8 +13,8 @@ except Exception as exception:
     sys.exit(1)
 
 
-class WatchingAnimeJoyActivity(Activity):
-    activity_name = "WatchingAnimeJoy"
+class WatchingAnimeActivity(Activity):
+    activity_name = "WatchingAnime"
     main_rp_app_name = "watching"
 
     clear_delay_seconds = 60
