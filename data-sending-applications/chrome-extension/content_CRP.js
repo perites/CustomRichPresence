@@ -129,6 +129,26 @@ class WatchingAnimeJoy extends WatchingAnime {
     };
 }
 
+class WatchingCrunchyroll extends WatchingAnime {
+    get currentEpisode() {
+        const episodeString = Array.from(document.getElementsByClassName('erc-current-media-info')[0].children).filter(el => el.nodeName === 'H1')[0].textContent;
+        return parseInt(episodeString.split(" - ")[0].slice(1))
+    }
+
+
+    findTitleName = () => {
+
+        setTimeout(() => {
+            this.titleName =  document.getElementsByClassName('show-title-link')[0].firstChild.textContent
+        }, 1000 * 2);
+
+    }
+
+    getMALTitleId = () => {
+           return 0
+    };
+
+}
 
 class Geoguessr extends Activity {
     constructor() {
@@ -257,6 +277,11 @@ window.addEventListener("load", () => {
         case "animejoy":
             act = new WatchingAnimeJoy();
             break;
+
+        case "crunchyroll":
+            act = new WatchingCrunchyroll();
+            break
+
         case 'geoguessr':
             act = new Geoguessr();
             break;

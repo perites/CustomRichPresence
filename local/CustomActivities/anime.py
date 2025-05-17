@@ -7,7 +7,7 @@ from .logger import logger
 
 try:
     from rpac import Activity, UpdateInfo
-    from mal import Anime
+    from mal import Anime, AnimeSearch
 except Exception as exception:
     logger.exception(f"Failed to load external modules, exiting")
     sys.exit(1)
@@ -74,7 +74,13 @@ class Title:
     current_episode: int = -1
 
     def __post_init__(self):
-        self.mal_title = Anime(self.mal_title_id)
+        if self.mal_title_id == 0:
+            self.mal_title = Anime(AnimeSearch(self.raw_title_name).results[0].mal_id)
+
+        else:
+            self.mal_title = Anime(self.mal_title_id)
+
+        # self.mal_title = Anime(self.mal_title_id)
         self.title_name = self.mal_title.title_english or self.mal_title.title
 
         self.episodes_amount = self.mal_title.episodes
